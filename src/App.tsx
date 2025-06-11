@@ -47,19 +47,21 @@ function App() {
 
     return (
         <main className="container">
-            <h1>Группировка данных</h1>
-            <p>Выберите файл для создания отчета</p>
+            <div className='content'>
+                <h1>Группировка данных</h1>
+                <p>Выберите файл для создания отчета</p>
 
-            <div className="row">
-                <label>
-                    <FileInput onFileChange={onInputChange} />
-                </label>
+                <div className="row">
+                    <label>
+                        <FileInput onFileChange={onInputChange} />
+                    </label>
+                </div>
+
+                {loading && <div className="loading">Идет формирование отчета...</div>}
+
+                {outputMsg && <div className="result error">{outputMsg}</div>}
+                {successMessage && <div className="result">{successMessage}</div>}
             </div>
-
-            {loading && <div className="loading">Идет формирование отчета...</div>}
-
-            {outputMsg && <div className="result error">{outputMsg}</div>}
-            {successMessage && <div className="result">{successMessage}</div>}
         </main>
     );
 }

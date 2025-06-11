@@ -2,15 +2,16 @@ use crate::{
     helpers::{extract_date_from_row, naive_datetime_to_excel_days, sum_duration},
     models::{Employee, Task},
 };
-use std::{fs, path::PathBuf, error::Error};
-use std::{collections::HashMap, path::Path};
+use std::collections::HashMap;
+use std::error::Error;
 use std::io::Cursor;
 
 use calamine::{open_workbook_auto_from_rs, DataType, Reader, Sheets};
-use rust_xlsxwriter::*;
+use rust_xlsxwriter::{
+    Color, Format, FormatAlign, FormatBorder, Workbook, Worksheet,
+};
 
 pub fn read_files(buffer: Vec<u8>) -> Result<Vec<Employee>, Box<dyn Error>> {
-
     let cursor = Cursor::new(buffer);
     let mut workbook: Sheets<Cursor<Vec<u8>>> = match open_workbook_auto_from_rs(cursor) {
         Ok(wb) => wb,
@@ -32,18 +33,23 @@ pub fn read_files(buffer: Vec<u8>) -> Result<Vec<Employee>, Box<dyn Error>> {
 
             for row in range.rows() {
                 let first_row_cell = row[0].get_string().unwrap_or("").to_string();
-    
+
                 if first_row_cell == "Проект" || first_row_cell == "" || row.is_empty() {
                     continue;
                 }
 
-                let name = row.get(6).unwrap().get_string().unwrap_or_default().to_string();
+                let name = row
+                    .get(6)
+                    .unwrap()
+                    .get_string()
+                    .unwrap_or_default()
+                    .to_string();
                 let duration = row.get(7).unwrap().get_float().unwrap_or(0.0) as f32;
                 let task_number = row.get(2).unwrap().get_string().unwrap_or("").to_string();
                 let task_name = row.get(3).unwrap().get_string().unwrap_or("").to_string();
                 let date = extract_date_from_row(&row.get(5).unwrap().clone()).unwrap_or_default();
                 let description = row.get(8).unwrap().get_string().unwrap_or("").to_string();
-    
+
                 employees.push(Employee {
                     name,
                     duration,
@@ -52,10 +58,10 @@ pub fn read_files(buffer: Vec<u8>) -> Result<Vec<Employee>, Box<dyn Error>> {
                     description,
                 });
             }
-    
+
             return Ok(employees);
-        },
-        Err(_) => Ok(Vec::new())
+        }
+        Err(_) => Ok(Vec::new()),
     }
 }
 
@@ -97,7 +103,6 @@ pub fn get_grouped_employees(
     titles: &Vec<String>,
     tasks: &HashMap<String, Task>,
 ) -> Result<Vec<u8>, Box<dyn Error>> {
-
     let mut workbook = Workbook::new();
 
     let bold_format = Format::new().set_bold();
