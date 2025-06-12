@@ -1,8 +1,8 @@
 import './App.css';
 import { useState } from 'react';
 import { process_excel_file } from './wasm';
-import { FileInput } from './components/file-input';
 import { loadFile } from './helpers';
+import FileUploadButton from './components/FileButton/FileButton';
 
 function App() {
     const [loading, setLoading] = useState(false);
@@ -45,15 +45,21 @@ function App() {
         }
     };
 
+    const clearMessages = () => {
+        setOutputMsg(null);
+        setSuccessMessage(null);
+        setLoading(false);
+    };
+
     return (
         <main className="container">
-            <div className='content'>
+            <div className="content">
                 <h1>Группировка данных</h1>
                 <p>Выберите файл для создания отчета</p>
 
                 <div className="row">
                     <label>
-                        <FileInput onFileChange={onInputChange} />
+                        <FileUploadButton onFileChange={onInputChange} clearMessages={clearMessages} />
                     </label>
                 </div>
 

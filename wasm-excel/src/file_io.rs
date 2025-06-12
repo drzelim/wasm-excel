@@ -65,6 +65,39 @@ pub fn read_files(buffer: Vec<u8>) -> Result<Vec<Employee>, Box<dyn Error>> {
     }
 }
 
+const MAX_EXCEL_STRING_LEN: usize = 32767;
+
+fn get_safe_description(description: &str) -> String {
+    if description.len() <= MAX_EXCEL_STRING_LEN {
+        return description.to_string();
+    }
+
+    // If the description is too long, truncate it to fit within the Excel limit
+    // and ensure it does not break any UTF-8 characters.
+    // This is a simple truncation that does not handle multi-byte characters.
+    // A more sophisticated approach would be to handle multi-byte characters properly,
+    // but for simplicity, we will just truncate at the character level.
+
+    let safe_description = {
+        let mut s = description.chars();
+        let mut result = String::new();
+        while result.len() < MAX_EXCEL_STRING_LEN {
+            if let Some(c) = s.next() {
+                let char_len = c.len_utf8();
+                if result.len() + char_len > MAX_EXCEL_STRING_LEN {
+                    break;
+                }
+                result.push(c);
+            } else {
+                break;
+            }
+        }
+        result
+    };
+
+    safe_description
+}
+
 fn wtire_employees(worksheet: &mut Worksheet, employees: &Vec<Employee>, offset: u32) {
     let date_format = Format::new().set_num_format("yyyy-mm.dd hh:MM:ss");
     let duration_format = Format::new().set_num_format("0.00");
@@ -88,11 +121,14 @@ fn wtire_employees(worksheet: &mut Worksheet, employees: &Vec<Employee>, offset:
                 &date_format,
             )
             .unwrap();
+
+        let safe_description = get_safe_description(&employe.description);
+
         worksheet
             .write_with_format(
                 inx + offset + 1,
                 4,
-                employe.description.clone(),
+                safe_description,
                 &text_format,
             )
             .unwrap();

@@ -1,0 +1,23 @@
+.file-upload-button {
+    margin-top: 16px;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.file-info img {
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.file-info img:hover {
+    transform: scale(1.1);
+}
+
+.get-report-button {
+    margin-top: 16px;
+}
