@@ -17,8 +17,3 @@ pub fn process_excel_file(data: Option<Vec<u8>>) -> Vec<u8>  {
         }
     }
 }
-
-#[wasm_bindgen]
-pub fn get_uint8_array_from_vec(data: &[u8]) -> Vec<u8> {
-    data.to_vec()
-}
