@@ -1,54 +1,162 @@
-# React + TypeScript + Vite
+# Excel Web - Обработка и группировка данных из Excel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-приложение для автоматической обработки Excel файлов с данными о сотрудниках и задачах. Приложение группирует данные, агрегирует информацию и создает структурированный отчет.
 
-Currently, two official plugins are available:
+## Особенности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **WebAssembly для производительности**: Обработка данных выполняется на Rust с компиляцией в WebAssembly для максимальной скорости
+- **Группировка данных**: Автоматическая группировка по задачам и сотрудникам
+- **Агрегация по периодам**: Группировка данных по месяцам
+- **Объединение дубликатов**: Суммирование времени для одинаковых сотрудников
+- **Браузерная обработка**: Все данные обрабатываются локально в браузере, без отправки на сервер
 
-## Expanding the ESLint configuration
+## Технологический стек
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend
+- **React 19** - UI библиотека
+- **TypeScript** - типизация
+- **Material-UI** - компоненты интерфейса
+- **Vite** - сборщик и dev-сервер
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Backend (WebAssembly)
+- **Rust** - язык для обработки данных
+- **wasm-bindgen** - связь между JavaScript и WebAssembly
+- **calamine** - чтение Excel файлов
+- **rust_xlsxwriter** - создание Excel отчетов
+- **chrono** - работа с датами
+
+## Установка
+
+### Требования
+- Node.js (версия 18+)
+- Rust и wasm-pack
+- npm или yarn
+
+### Установка Rust и wasm-pack
+
+```bash
+# Установка Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Установка wasm-pack
+cargo install wasm-pack
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Установка зависимостей
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Установка npm зависимостей
+npm install
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+# Сборка WebAssembly модуля
+npm run wasm
 ```
+
+## Запуск
+
+### Режим разработки
+
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу `http://localhost:5173`
+
+### Сборка для production
+
+```bash
+npm run build
+```
+
+Собранные файлы будут в папке `dist/`
+
+### Предварительный просмотр production сборки
+
+```bash
+npm run preview
+```
+
+## Структура проекта
+
+```
+excel-web/
+├── src/                    # Исходный код React приложения
+│   ├── components/        # React компоненты
+│   │   ├── FileButton/   # Компонент кнопки загрузки файла
+│   │   └── FileInput.tsx
+│   ├── helpers/          # Вспомогательные функции
+│   ├── wasm/            # WebAssembly интерфейс
+│   ├── App.tsx          # Главный компонент
+│   └── main.tsx         # Точка входа
+├── wasm-excel/          # Rust WebAssembly модуль
+│   ├── src/
+│   │   ├── lib.rs       # Точка входа WASM
+│   │   ├── models.rs    # Модели данных
+│   │   ├── helpers.rs   # Функции обработки
+│   │   └── file_io.rs   # Чтение/запись Excel
+│   └── Cargo.toml       # Зависимости Rust
+├── example/            # Примеры входных и выходных файлов
+├── public/              # Статические файлы
+├── dist/               # Собранное приложение
+└── package.json        # Зависимости Node.js
+```
+
+## Использование
+
+1. Откройте приложение в браузере
+2. Нажмите кнопку "Выбрать файл"
+3. Выберите Excel файл (.xlsx) с данными
+4. Дождитесь обработки
+5. Отчет автоматически загрузится с именем `[исходное-имя]-output.xlsx`
+
+### Формат входных данных
+
+Приложение работает с Excel файлами (.xlsx), которые являются выгрузкой отчета из Jira.
+
+Файл должен содержать столбцы с информацией о:
+- Имени сотрудника
+- Названии задачи
+- Дате выполнения
+- Длительности работы
+- Описании
+
+### Формат выходного отчета
+
+Отчет группируется по:
+- Задачам
+- Месяцам
+- Сотрудникам
+
+С автоматическим подсчетом общего времени и объединением описаний.
+
+## Примеры
+
+В папке `example/` находятся примеры файлов для тестирования:
+- `excel-web-example.xlsx` - пример входного файла (выгрузка из Jira)
+- `excel-web-example-output.xlsx` - пример обработанного отчета
+
+Вы можете использовать эти файлы для ознакомления с форматом данных и тестирования приложения.
+
+## Скрипты
+
+- `npm run dev` - запуск dev-сервера
+- `npm run build` - сборка для production
+- `npm run wasm` - компиляция Rust в WebAssembly
+- `npm run lint` - проверка кода ESLint
+- `npm run preview` - просмотр production сборки
+
+## Производительность
+
+Проект оптимизирован для быстрой работы:
+- WebAssembly обеспечивает высокую скорость обработки данных
+- LTO (Link Time Optimization) в Rust
+- Оптимизация размера с `opt-level = "s"`
+- Минимальное количество code units для уменьшения размера WASM
+
+## Лицензия
+
+MIT
+
+## Автор
+
+@drzelim
